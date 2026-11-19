@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Battle Royale Caster 2D — FNCS Tactical Broadcast</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="hud">
+    <div id="switch-toast" class="panel"></div>
+
+    <!-- Haut Gauche : Badge Live / Chrono / Phase Tempête -->
+    <div id="top-left">
+      <div id="broadcast-bar" class="panel">
+        <span class="live-pill">LIVE</span>
+        <span id="match-timer">00:00</span>
+        <span class="sep-sm"></span>
+        <span id="phase-label">Phase 1 / 8</span>
+        <span id="phase-timer">Bus en vol</span>
+      </div>
+    </div>
+
+    <!-- Haut Droite : En vie + Zone + Killfeed -->
+    <div id="top-right">
+      <div id="status-bar" class="panel">
+        <div id="alive-badge">
+          <span id="alive-dot" class="alive-dot"></span>
+          <span id="alive-text">En vie : 100 / 100</span>
+        </div>
+        <div id="storm-badge">Zone : 4200m</div>
+      </div>
+      <div id="killfeed"></div>
+    </div>
+
+    <!-- Bas Gauche : Caméras Caster + Vitesses -->
+    <div id="bottom-left">
+      <div class="control-row panel">
+        <button id="btn-cam-bus" class="hud-btn active" title="Touche 1">1 · Vue Bus</button>
+        <button id="btn-cam-free" class="hud-btn" title="Touche 2">2 · Libre</button>
+        <button id="btn-cam-player" class="hud-btn" title="Touche 3">3 · Suivre Joueur</button>
+        <button id="btn-cam-map" class="hud-btn" title="Touche 4">4 · Vue Carte</button>
+      </div>
+      <div class="control-row panel">
+        <span class="speed-label">Vitesse :</span>
+        <button id="btn-speed-1" class="hud-btn speed-btn active" data-speed="1">x1 (22min)</button>
+        <button id="btn-speed-2" class="hud-btn speed-btn" data-speed="2">x2</button>
+        <button id="btn-speed-5" class="hud-btn speed-btn" data-speed="5">x5</button>
+        <button id="btn-speed-10" class="hud-btn speed-btn" data-speed="10">x10</button>
+      </div>
+    </div>
+
+    <!-- Bas Centre : HUD Joueur Horizontal Compact (max-height: 110px) -->
+    <div id="bottom-center">
+      <div id="player-nav" class="panel">
+        <button id="btn-prev-bot" class="hud-btn">&lt; Joueur Précédent</button>
+        <span id="watched-weapon" class="weapon-badge">Pioche</span>
+        <button id="btn-next-bot" class="hud-btn">Joueur Suivant &gt;</button>
+      </div>
+
+      <div id="player-hud" class="panel">
+        <!-- Gauche : Pseudo, Kills, Shield (Bleu 0-100), PV (Vert 0-100) -->
+        <div id="player-left">
+          <div class="player-id-row">
+            <span id="watched-name">KC Kairo</span>
+            <span id="watched-kills">0 Kills</span>
+          </div>
+          <div class="bars-stack">
+            <div class="bar-wrap shield-wrap">
+              <div id="watched-shield-bar"></div>
+              <div id="watched-shield-text">0 / 100</div>
+            </div>
+            <div class="bar-wrap hp-wrap">
+              <div id="watched-hp-bar"></div>
+              <div id="watched-hp-text">100 / 100</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Centre : 5 Cases de Stuff (48x48 chacune, rareté + bordure blanche active) -->
+        <div id="inventory-slots">
+          <div class="inv-slot" id="inv-slot-0"></div>
+          <div class="inv-slot" id="inv-slot-1"></div>
+          <div class="inv-slot" id="inv-slot-2"></div>
+          <div class="inv-slot" id="inv-slot-3"></div>
+          <div class="inv-slot" id="inv-slot-4"></div>
+        </div>
+
+        <!-- Droite : Matériaux compacts (Bois, Brique, Métal, icônes <= 16px) -->
+        <div id="mats-row">
+          <span class="mat-pill mat-wood" title="Bois">
+            <svg width="16" height="16" viewBox="0 0 24 24" class="mat-svg"><path fill="#d97706" d="M4 6h16v3H4zm0 5h16v3H4zm0 5h16v3H4z"/></svg>
+            <span id="mat-wood-val">80</span>
+          </span>
+          <span class="mat-pill mat-brick" title="Brique">
+            <svg width="16" height="16" viewBox="0 0 24 24" class="mat-svg"><path fill="#ef4444" d="M3 5h8v4H3zm10 0h8v4h-8zM3 10h4v4H3zm6 0h6v4H9zm8 0h4v4h-4zM3 15h8v4H3zm10 0h8v4h-8z"/></svg>
+            <span id="mat-brick-val">40</span>
+          </span>
+          <span class="mat-pill mat-metal" title="Métal">
+            <svg width="16" height="16" viewBox="0 0 24 24" class="mat-svg"><path fill="#94a3b8" d="M4 4h16v16H4V4zm3 3v10h10V7H7zm2 2h6v6H9V9z"/></svg>
+            <span id="mat-metal-val">20</span>
+          </span>
+        </div>
+      </div>
+
+      <div id="controls-hint" class="panel">
+        Molette : Zoom • Clic glissé : Déplacer la caméra • Touches 1-4 : Vues
+      </div>
+    </div>
+
+    <!-- Bannière Victoire Royale -->
+    <div id="victory-banner" class="panel">
+      <div id="victory-title">TOP 1 - VICTOIRE ROYALE</div>
+      <div id="victory-sub">Gagnant : ---</div>
+      <button id="btn-restart" class="hud-btn">Nouvelle Partie</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
